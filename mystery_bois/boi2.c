@@ -3,20 +3,23 @@
 #include "lib/mstdlib.h"
 #include "lib/mstring.h"
 
-// Takes input onto reg->sp and verifies that it's the right length
-// r[0] has the length to assert with
+// Dispatch table
 int load1(struct reg_t *reg) {
+  // read input into reg->sp
   if (reg->r[0] == 0) {
     reg->r[1] = 32;
     CALL_ENCODED(reg, BOI4_BIN);
   }
 
-  char *out = "asdf";
-  write(stdout, out, 4);
-
-  if (strlen(((char *)reg->sp)) < 30) {
-    FAIL(reg);
+  // check reg->sp input
+  if (reg->r[0] == 1) {
+    CALL_ENCODED(reg, BOI5_BIN);
   }
+
+  if (reg->r[0] == 2) {
+    CALL_ENCODED(reg, BOI3_BIN);
+  }
+  JUMP_ENCODED(BOI1_BIN);
 
   RETURN_ENCODED(reg);
 }

@@ -15,13 +15,17 @@ struct reg_t {
 
   int *rfs; // fd return callstack
 
-  int volatile rf; // fd # of current module. effectively IP
+  int rf; // fd # of current module. effectively IP
   int *volatile flag_ptr;
 
   long long volatile r[8]; // 8 GPRs
 };
 
 typedef int (*jit_func_t)(struct reg_t *);
+
+#define JUMP_ENCODED(encoded_fname)                                            \
+  long long volatile next_file = encoded_fname;                                \
+  return open(&next_file, O_RDONLY, NULL);
 
 #define CALL_ENCODED(reg, encoded_fname)                                       \
   reg->rfs++;                                                                  \

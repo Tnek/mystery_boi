@@ -11,10 +11,10 @@
     len;                                                                       \
   })
 
-#define print(buf)                                                             \
-  do {                                                                         \
-    write(stdout, buf, strlen(buf));                                           \
-  } while (0)
+#define print(buf, len)                                                        \
+  for (size_t i = 0; i < len; i++) {                                           \
+    write(stdout, *(buf++), 1);                                                \
+  }
 
 #define fgets(str, num, stream)                                                \
   ({                                                                           \

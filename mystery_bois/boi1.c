@@ -5,5 +5,5 @@ int load1(struct reg_t *reg) {
 
   write(stdout, &winstr, 7);
   close(reg->rf);
-  return 0;
+  return -1;
 }

@@ -24,23 +24,27 @@ struct reg_t *init_regs(void) {
   }
 
   ret->sp = malloc(sizeof(char) * STACK_SIZE);
-  ret->rfs = calloc(CALLSTACK_DEPTH, sizeof(int));
+  ret->rfs = malloc(CALLSTACK_DEPTH * sizeof(int));
+  memset(ret->rfs, -1, CALLSTACK_DEPTH * sizeof(int));
   ret->rfs++;
   return ret;
 }
 
 void callfunc(char *startfile, struct reg_t *ptr) {
   int fd = open(startfile, O_RDONLY);
+  ptr->rf = fd;
 
-  while (fd != 0) {
+  while (fd != -1) {
+    lseek(fd, 0, SEEK_SET);
     if (read(fd, ptr->cs, PAGE_SIZE - 1) != 0) {
       jit_func_t func = ptr->cs; // The function should close it's own fd
 #ifdef DEBUG
-      printf("func %d\n", fd);
+      printf("func %d ret %d\n", fd, *ptr->rfs);
 #endif
       fd = func(ptr);
     }
   }
+  printf("Test exit %d\n", fd);
 }
 
 void *jit_thread_func(void *vargp) {
@@ -68,7 +72,5 @@ void __attribute__((constructor)) spawn_mmap(void) {
 
 int main(int argc, char *argv[]) {
   printf("Good bye\n");
-  while (1)
-    ;
   return 0;
 }
