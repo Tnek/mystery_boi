@@ -3,23 +3,24 @@
 #include "lib/mstdlib.h"
 #include "lib/mstring.h"
 
-// Dispatch table
+// Dispatch table for fetching input
 int load1(struct reg_t *reg) {
-  // read input into reg->sp
-  if (reg->r[0] == 0) {
-    reg->r[1] = 32;
+  switch (reg->r[STATE_REG]) {
+  case READ_INPUT:
+    reg->r[1] = READ_LEN;
     CALL_ENCODED(reg, BOI4_BIN);
-  }
-
-  // check reg->sp input
-  if (reg->r[0] == 1) {
+    break;
+  case VERIFY_LENGTH:
     CALL_ENCODED(reg, BOI5_BIN);
-  }
-
-  if (reg->r[0] == 2) {
+    break;
+  case VERIFY_VALUE:
     CALL_ENCODED(reg, BOI3_BIN);
-  }
-  JUMP_ENCODED(BOI1_BIN);
-
+    break;
+  case FAIL_RESET:
+    JUMP_ENCODED(BOI0_BIN);
+    break;
+  default:
+    JUMP_ENCODED(BOI1_BIN);
+  };
   RETURN_ENCODED(reg);
 }

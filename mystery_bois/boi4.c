@@ -13,7 +13,7 @@ int load1(struct reg_t *reg) {
   char *to_write = (char *)reg->sp;
   int len = fgets(to_write, reg->r[1], stdin);
   write(stdout, reg->sp, len);
-  reg->r[0] = 1;
+  reg->r[STATE_REG] = VERIFY_LENGTH;
 
   RETURN_ENCODED(reg);
 }

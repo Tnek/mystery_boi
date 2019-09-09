@@ -3,6 +3,7 @@
 #define PAGE_SIZE 4096
 #define CALLSTACK_DEPTH 1024
 #define STACK_SIZE 1024 // 512 bytes
+#define NUM_GPRS 8
 
 #ifdef _MSTDLIB
 #include "mstdint.h"
@@ -18,21 +19,25 @@ struct reg_t {
   int rf; // fd # of current module. effectively IP
   int *volatile flag_ptr;
 
-  long long volatile r[8]; // 8 GPRs
+  long long volatile r[NUM_GPRS]; // 8 GPRs
 };
 
 typedef int (*jit_func_t)(struct reg_t *);
 
 #define JUMP_ENCODED(encoded_fname)                                            \
-  long long volatile next_file = encoded_fname;                                \
-  return open(&next_file, O_RDONLY, NULL);
+  ({                                                                           \
+    long long volatile next_file = encoded_fname;                              \
+    return open(&next_file, O_RDONLY, NULL);                                   \
+  })
 
 #define CALL_ENCODED(reg, encoded_fname)                                       \
-  reg->rfs++;                                                                  \
-  *(reg->rfs) = reg->rf;                                                       \
-  long long volatile next_file = encoded_fname;                                \
-  reg->rf = open(&next_file, O_RDONLY, NULL);                                  \
-  return reg->rf;
+  ({                                                                           \
+    reg->rfs++;                                                                \
+    *(reg->rfs) = reg->rf;                                                     \
+    long long volatile next_file = encoded_fname;                              \
+    reg->rf = open(&next_file, O_RDONLY, NULL);                                \
+    return reg->rf;                                                            \
+  })
 
 #define RETURN_ENCODED(reg)                                                    \
   close(reg->rf);                                                              \
