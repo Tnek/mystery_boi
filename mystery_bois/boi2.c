@@ -7,20 +7,18 @@
 int load1(struct reg_t *reg) {
   switch (reg->r[STATE_REG]) {
   case READ_INPUT:
-    reg->r[1] = READ_LEN;
+    reg->r[A1_REG] = READ_LEN;
     CALL_ENCODED(reg, BOI4_BIN);
     break;
   case VERIFY_LENGTH:
     CALL_ENCODED(reg, BOI5_BIN);
     break;
   case VERIFY_VALUE:
-    CALL_ENCODED(reg, BOI3_BIN);
+    JUMP_ENCODED(BOI3_BIN);
     break;
   case FAIL_RESET:
-    JUMP_ENCODED(BOI0_BIN);
+    CALL_ENCODED(reg, BOI0_BIN);
     break;
-  default:
-    JUMP_ENCODED(BOI1_BIN);
   };
   RETURN_ENCODED(reg);
 }

@@ -26,8 +26,10 @@ typedef int (*jit_func_t)(struct reg_t *);
 
 #define JUMP_ENCODED(encoded_fname)                                            \
   ({                                                                           \
+    close(reg->rf);                                                            \
     long long volatile next_file = encoded_fname;                              \
-    return open(&next_file, O_RDONLY, NULL);                                   \
+    reg->rf = open(&next_file, O_RDONLY, NULL);                                \
+    return reg->rf;                                                            \
   })
 
 #define CALL_ENCODED(reg, encoded_fname)                                       \
