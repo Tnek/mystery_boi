@@ -18,6 +18,9 @@ int loadl(struct reg_t *reg) {
   case PARSE_FINISH:
     JUMP_ENCODED(BOI1_BIN);
     break;
+  case FAIL_VERIFY:
+    JUMP_ENCODED(BOI0_BIN);
+    break;
   }
   RETURN_ENCODED(reg);
 }

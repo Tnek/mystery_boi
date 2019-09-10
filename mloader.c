@@ -1,19 +1,14 @@
 #include "mloader.h"
-#define JIT_START_FILE "boi2bin"
 
 pthread_t *jit_loop;
 struct reg_t *regs;
-
-int enc_fleg[] = {-75, -117, 24, 6,  -54, 33, 114, 78, 99, 87,
-                  60,  -63,  60, 78, 54,  24, 18,  78, 45, -90,
-                  78,  -36,  0,  18, 99,  60, -63, 0,  108};
 
 struct reg_t *init_regs(void) {
   struct reg_t *ret = (struct reg_t *)malloc(sizeof(struct reg_t));
   memset(ret, 0, sizeof(struct reg_t));
 
-  ret->flag_ptr = malloc(sizeof(enc_fleg));
-  memcpy(ret->flag_ptr, enc_fleg, 29);
+  //  ret->flag_ptr = malloc(sizeof(enc_fleg));
+  //  memcpy(ret->flag_ptr, enc_fleg, 29);
 
   ret->cs = mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC,
                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -30,10 +25,42 @@ struct reg_t *init_regs(void) {
   return ret;
 }
 
-void callfunc(char *startfile, struct reg_t *ptr) {
-  int fd = open(startfile, O_RDONLY);
-  ptr->rf = fd;
+volatile int CHECKSUM_VALUE = 0xdc2b4047;
+extern unsigned char *_start;
+extern unsigned char *__etext;
 
+void checksum_me() {
+  char *start = (char *)&_start;
+  char *end = (char *)&__etext;
+
+  unsigned checksum = 0;
+  unsigned word = 0;
+
+  unsigned counter = 0;
+
+  while (start != end) {
+    if (counter == 8) {
+      checksum ^= word;
+      word = 0;
+      counter = 0;
+    }
+    word = (word << 8) | ((*(volatile unsigned *)start) & 0xFF);
+
+    counter++;
+    start++;
+  }
+
+  if (checksum != CHECKSUM_VALUE) {
+#ifdef DEBUG
+    printf("Checksum_ptr: %x\n", checksum);
+#else
+    kms();
+#endif
+  }
+}
+
+void callfunc(int fd, struct reg_t *ptr) {
+  ptr->rf = fd;
   while (fd != -1) {
     lseek(fd, 0, SEEK_SET);
     if (read(fd, ptr->cs, PAGE_SIZE - 1) != 0) {
@@ -48,16 +75,36 @@ void callfunc(char *startfile, struct reg_t *ptr) {
 }
 
 void *jit_thread_func(void *vargp) {
-  callfunc(JIT_START_FILE, regs);
+  int offset = 0;
+
+  if (ptrace(PTRACE_TRACEME, 0, 1, 0) == 0) {
+    offset = 1;
+  }
+  if (ptrace(PTRACE_TRACEME, 0, 1, 0) == -1) {
+    offset *= 2;
+  }
+
+  char startfile[] = "boi0";
+  startfile[3] += offset;
+
+#ifdef DEBUG
+  printf("Startfile: %s\n", startfile);
+#endif
+
+  int fd = open(startfile, O_RDONLY);
+
+  callfunc(fd, regs);
   pthread_exit(NULL);
 }
 
 void __attribute__((constructor)) spawn_mmap(void) {
+  checksum_me();
   dladdr_check("mmap", "libc.so.6");
   dladdr_check("free", "libc.so.6");
   dladdr_check("printf", "libc.so.6");
   dladdr_check("perror", "libc.so.6");
   dladdr_check("malloc", "libc.so.6");
+  dladdr_check("exit", "libc.so.6");
   dladdr_check("calloc", "libc.so.6");
   dladdr_check("memset", "libc.so.6");
   dladdr_check("pthread_create", "libpthread.so.0");
