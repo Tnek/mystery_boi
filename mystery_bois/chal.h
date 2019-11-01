@@ -3,6 +3,8 @@
 #include "lib/mstdlib.h"
 
 #define BOIC_BIN 0x0063696f62
+#define BOI9_BIN 0x0039696f62
+#define BOI8_BIN 0x0038696f62
 #define BOI7_BIN 0x0037696f62
 #define BOI6_BIN 0x0036696f62
 #define BOI5_BIN 0x0035696f62
@@ -20,17 +22,27 @@ enum state {
   VERIFY_POP_CHAR,
   VERIFY_CHAR,
   PARSE_FINISH,
-  FAIL_VERIFY
+  FAIL_VERIFY,
+  GO_HOME,
+  VERIFY_FOUND_KEY,
+  CORRECT_CHECKER
 };
 
-#define A1_REG 1
+enum assigned_regs {
+  A1_REG,
+  CHECKER_REG,
+  FAIL_REG,
+  LEN_REG,
+  POP_REG,
+  STATE_REG,
+  GROUP_REG,
+  GROUP_MATCH_REG,
+  CHECKER_FOUND_REG
 
-#define FAIL_REG 4
-#define LEN_REG 5
-#define POP_REG 6
-#define STATE_REG 7
+};
 
-#define FLAG_LEN 3
+// flag{jk_there_was_no_mystery}
+#define FLAG_LEN 30
 #define READ_LEN 32
 
 #define FAIL(reg)                                                              \

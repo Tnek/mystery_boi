@@ -3,6 +3,7 @@
 #include "lib/mstdlib.h"
 #include "lib/mstring.h"
 
+/* Checks length of flag entered */
 int loadl(struct reg_t *reg) {
   char *str = (char *)reg->sp;
 

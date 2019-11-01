@@ -14,6 +14,8 @@ int load1(struct reg_t *reg) {
     CALL_ENCODED(reg, BOI5_BIN);
     break;
   case VERIFY_VALUE:
+    reg->r[STATE_REG] = VERIFY_POP_CHAR;
+    reg->r[LEN_REG] = 0;
     JUMP_ENCODED(BOI3_BIN);
     break;
   case FAIL_RESET:

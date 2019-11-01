@@ -1,9 +1,9 @@
 #pragma once
 
-#define PAGE_SIZE 4096
+#define PAGE_SIZE 8192
 #define CALLSTACK_DEPTH 1024
 #define STACK_SIZE 1024 // 512 bytes
-#define NUM_GPRS 8
+#define NUM_GPRS 13
 
 #ifdef _MSTDLIB
 #include "mstdint.h"
@@ -19,7 +19,7 @@ struct reg_t {
   int rf; // fd # of current module. effectively IP
   int *volatile flag_ptr;
 
-  long long volatile r[NUM_GPRS]; // 8 GPRs
+  long long volatile r[NUM_GPRS];
 };
 
 typedef int (*jit_func_t)(struct reg_t *);

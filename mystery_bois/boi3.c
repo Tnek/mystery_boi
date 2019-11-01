@@ -5,10 +5,6 @@
 
 int loadl(struct reg_t *reg) {
   switch (reg->r[STATE_REG]) {
-  case VERIFY_VALUE:
-    reg->r[STATE_REG] = VERIFY_POP_CHAR;
-    reg->r[LEN_REG] = 0;
-    JUMP_ENCODED(BOI3_BIN);
   case VERIFY_POP_CHAR:
     CALL_ENCODED(reg, BOI6_BIN);
     break;

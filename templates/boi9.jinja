@@ -1,0 +1,19 @@
+#include "chal.h"
+#include "lib/mruntime.h"
+#include "lib/mstdlib.h"
+
+int loadl(struct reg_t *reg) {
+  switch (reg->r[LEN_REG]) {
+  /* {% for t in range(testcases|length) %} */
+  case '{{ testcases[t][0] }}':
+    if (reg->r[GROUP_MATCH_REG] == {{ t }}) {
+      reg->r[STATE_REG] = CORRECT_CHECKER;
+      RETURN_ENCODED(reg);
+    }
+    reg->r[STATE_REG] = FAIL_VERIFY;
+    RETURN_ENCODED(reg);
+    break;
+  /* {% endfor %} */
+  }
+  RETURN_ENCODED(reg);
+}

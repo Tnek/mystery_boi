@@ -13,5 +13,3 @@
 
 #include "antideboog.h"
 #include "mystery_bois/lib/mruntime.h"
-
-#define DEBUG

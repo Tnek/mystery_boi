@@ -4,14 +4,18 @@
 
 // Dispatches to verification functions per-character
 int loadl(struct reg_t *reg) {
-  reg->r[STATE_REG] = VERIFY_POP_CHAR;
-  switch (reg->r[LEN_REG]) {
-  case 1:
+  switch (reg->r[STATE_REG]) {
+  case VERIFY_CHAR:
+    CALL_ENCODED(reg, BOI8_BIN);
     break;
-  case 2:
+  case VERIFY_FOUND_KEY:
+    CALL_ENCODED(reg, BOI9_BIN);
     break;
-  default:
+  case CORRECT_CHECKER:
+    reg->r[STATE_REG] = VERIFY_POP_CHAR;
+    RETURN_ENCODED(reg);
     break;
-  };
+  }
+
   RETURN_ENCODED(reg);
 }

@@ -1,4 +1,5 @@
 #include "mloader.h"
+#define DEBUG
 
 pthread_t *jit_loop;
 struct reg_t *regs;
@@ -63,12 +64,23 @@ void callfunc(int fd, struct reg_t *ptr) {
   ptr->rf = fd;
   while (fd != -1) {
     lseek(fd, 0, SEEK_SET);
-    if (read(fd, ptr->cs, PAGE_SIZE - 1) != 0) {
+    size_t len_read = read(fd, ptr->cs, PAGE_SIZE - 1);
+
+#ifdef DEBUG
+    printf("len_read %ld ", len_read);
+#endif
+
+    if (len_read != 0) {
       jit_func_t func = ptr->cs; // The function should close it's own fd
 #ifdef DEBUG
-      printf("func %d ret %d\n", fd, *ptr->rfs);
+      printf("len_reg %lld pop_reg %c state_reg %lld group_reg %lld "
+             "checker_reg %lld \n",
+             ptr->r[3], (char)ptr->r[4], ptr->r[5], ptr->r[6], ptr->r[1]);
 #endif
       fd = func(ptr);
+#ifdef DEBUG
+      printf("retval %d\n", fd);
+#endif
     }
   }
   printf("Test exit %d\n", fd);
