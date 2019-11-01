@@ -66,7 +66,7 @@ void callfunc(int fd, struct reg_t *ptr) {
     lseek(fd, 0, SEEK_SET);
     size_t len_read = read(fd, ptr->cs, PAGE_SIZE - 1);
 
-#ifdef DEBUG
+#ifdef DEBUGj
     printf("len_read %ld ", len_read);
 #endif
 
@@ -74,8 +74,9 @@ void callfunc(int fd, struct reg_t *ptr) {
       jit_func_t func = ptr->cs; // The function should close it's own fd
 #ifdef DEBUG
       printf("len_reg %lld pop_reg %c state_reg %lld group_reg %lld "
-             "checker_reg %lld \n",
-             ptr->r[3], (char)ptr->r[4], ptr->r[5], ptr->r[6], ptr->r[1]);
+             "checker_reg %lld group_match_reg %lld \n",
+             ptr->r[3], (char)ptr->r[4], ptr->r[5], ptr->r[6], ptr->r[1],
+             ptr->r[7]);
 #endif
       fd = func(ptr);
 #ifdef DEBUG

@@ -93,10 +93,6 @@ def gen_file(group):
     return uniq_name
 
 
-uniq_names = [gen_file(i) for i in groups]
-print(uniq_names)
-
-
 def gen_boi8(uniqs):
     uniq_names = [[i, gen_name(i)] for i in uniqs]
 
@@ -107,12 +103,7 @@ def gen_boi8(uniqs):
         f = FILE.write(output)
 
 
-gen_boi8(uniq_names)
-
-
-def gen_boi9(casdf):
-    components = [[c.value, c.key] for c in casdf]
-
+def gen_boi9(components):
     t = env.get_template("boi9.jinja")
     output = t.render(testcases=components)
 
@@ -120,4 +111,8 @@ def gen_boi9(casdf):
         f = FILE.write(output)
 
 
-gen_boi9(list_of_chars)
+uniq_names = [gen_file(i) for i in groups]
+print(uniq_names)
+gen_boi8(uniq_names)
+boi9_checker = [[c, keymap[c].key] for c in flag]
+gen_boi9(boi9_checker)

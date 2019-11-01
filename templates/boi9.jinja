@@ -3,17 +3,15 @@
 #include "lib/mstdlib.h"
 
 int loadl(struct reg_t *reg) {
-  switch (reg->r[LEN_REG]) {
   /* {% for t in range(testcases|length) %} */
-  case '{{ testcases[t][0] }}':
-    if (reg->r[GROUP_MATCH_REG] == {{ t }}) {
+  if (reg->r[LEN_REG] == {{t}} + 1) {
+    if (reg->r[GROUP_MATCH_REG] == {{ testcases[t][1] }}) {
       reg->r[STATE_REG] = CORRECT_CHECKER;
       RETURN_ENCODED(reg);
     }
     reg->r[STATE_REG] = FAIL_VERIFY;
     RETURN_ENCODED(reg);
-    break;
-  /* {% endfor %} */
   }
+  /* {% endfor %} */
   RETURN_ENCODED(reg);
 }
