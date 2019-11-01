@@ -12,6 +12,9 @@ int loadl(struct reg_t *reg) {
     CALL_ENCODED(reg, {{ uniq_names[g][1] }});
   }
   /* {% endfor %} */
+  if (reg->r[LEN_REG] == FLAG_LEN) {
+    JUMP_ENCODED(BOI1_BIN);
+  }
 
   reg->r[STATE_REG] = FAIL_VERIFY;
   RETURN_ENCODED(reg);

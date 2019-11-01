@@ -56,6 +56,9 @@ int loadl(struct reg_t *reg) {
     CALL_ENCODED(reg, 0x3132696f62);
   }
   /*  */
+  if (reg->r[LEN_REG] == FLAG_LEN) {
+    JUMP_ENCODED(BOI1_BIN);
+  }
 
   reg->r[STATE_REG] = FAIL_VERIFY;
   RETURN_ENCODED(reg);

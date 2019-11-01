@@ -7,6 +7,9 @@ int loadl(struct reg_t *reg) {
   if (reg->r[LEN_REG] == {{t}} + 1) {
     if (reg->r[GROUP_MATCH_REG] == {{ testcases[t][1] }}) {
       reg->r[STATE_REG] = CORRECT_CHECKER;
+      reg->r[GROUP_MATCH_REG] = 0;
+      reg->r[GROUP_REG] = 0;
+      reg->r[CHECKER_REG] = 0;
       RETURN_ENCODED(reg);
     }
     reg->r[STATE_REG] = FAIL_VERIFY;
