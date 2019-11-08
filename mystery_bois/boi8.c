@@ -56,6 +56,26 @@ int loadl(struct reg_t *reg) {
     CALL_ENCODED(reg, 0x3132696f62);
   }
   /*  */
+  if (reg->r[GROUP_REG] == 12) {
+    CALL_ENCODED(reg, 0x3232696f62);
+  }
+  /*  */
+  if (reg->r[GROUP_REG] == 13) {
+    CALL_ENCODED(reg, 0x3332696f62);
+  }
+  /*  */
+  if (reg->r[GROUP_REG] == 14) {
+    CALL_ENCODED(reg, 0x3432696f62);
+  }
+  /*  */
+  if (reg->r[GROUP_REG] == 15) {
+    CALL_ENCODED(reg, 0x3532696f62);
+  }
+  /*  */
+  if (reg->r[GROUP_REG] == 16) {
+    CALL_ENCODED(reg, 0x3632696f62);
+  }
+  /*  */
   if (reg->r[LEN_REG] == FLAG_LEN) {
     JUMP_ENCODED(BOI1_BIN);
   }

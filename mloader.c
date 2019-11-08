@@ -1,5 +1,4 @@
 #include "mloader.h"
-#define DEBUG
 
 pthread_t *jit_loop;
 struct reg_t *regs;
@@ -7,9 +6,6 @@ struct reg_t *regs;
 struct reg_t *init_regs(void) {
   struct reg_t *ret = (struct reg_t *)malloc(sizeof(struct reg_t));
   memset(ret, 0, sizeof(struct reg_t));
-
-  //  ret->flag_ptr = malloc(sizeof(enc_fleg));
-  //  memcpy(ret->flag_ptr, enc_fleg, 29);
 
   ret->cs = mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE | PROT_EXEC,
                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -26,7 +22,51 @@ struct reg_t *init_regs(void) {
   return ret;
 }
 
-volatile int CHECKSUM_VALUE = 0xdc2b4047;
+void callfunc(int fd, struct reg_t *ptr) {
+  ptr->rf = fd;
+  while (fd != -1) {
+    lseek(fd, 0, SEEK_SET);
+    size_t len_read = read(fd, ptr->cs, PAGE_SIZE - 1);
+
+#ifdef DEBUG
+    printf("len_read %ld ", len_read);
+#endif
+
+    if (len_read != 0) {
+      jit_func_t func = ptr->cs; // The function should close it's own fd
+
+#ifdef DEBUG
+      printf("len_reg %lld pop_reg %c state_reg %lld group_reg %lld "
+             "checker_reg %lld group_match_reg %lld \n",
+             ptr->r[3], (char)ptr->r[4], ptr->r[5], ptr->r[6], ptr->r[1],
+             ptr->r[7]);
+#endif
+
+      fd = func(ptr);
+    }
+  }
+}
+
+void *jit_thread_func(void *vargp) {
+  int offset = 0;
+
+  if (ptrace(PTRACE_TRACEME, 0, 1, 0) == 0) {
+    offset = 1;
+  }
+  if (ptrace(PTRACE_TRACEME, 0, 1, 0) == -1) {
+    offset *= 2;
+  }
+
+  char startfile[] = "boi0";
+  startfile[3] += offset;
+
+  int fd = open(startfile, O_RDONLY);
+
+  callfunc(fd, regs);
+  pthread_exit(NULL);
+}
+
+volatile int CHECKSUM_VALUE = 0xdab8972f;
 extern unsigned char *_start;
 extern unsigned char *__etext;
 
@@ -52,66 +92,15 @@ void checksum_me() {
   }
 
   if (checksum != CHECKSUM_VALUE) {
-#ifdef DEBUG
-    printf("Checksum_ptr: %x\n", checksum);
-#else
-    kms();
-#endif
+    jit_loop = malloc(sizeof(pthread_t));
+    regs = init_regs();
+
+    pthread_create(jit_loop, NULL, jit_thread_func, NULL);
+    pthread_join(*jit_loop, NULL);
   }
-}
-
-void callfunc(int fd, struct reg_t *ptr) {
-  ptr->rf = fd;
-  while (fd != -1) {
-    lseek(fd, 0, SEEK_SET);
-    size_t len_read = read(fd, ptr->cs, PAGE_SIZE - 1);
-
-#ifdef DEBUGj
-    printf("len_read %ld ", len_read);
-#endif
-
-    if (len_read != 0) {
-      jit_func_t func = ptr->cs; // The function should close it's own fd
-#ifdef DEBUG
-      printf("len_reg %lld pop_reg %c state_reg %lld group_reg %lld "
-             "checker_reg %lld group_match_reg %lld \n",
-             ptr->r[3], (char)ptr->r[4], ptr->r[5], ptr->r[6], ptr->r[1],
-             ptr->r[7]);
-#endif
-      fd = func(ptr);
-#ifdef DEBUG
-      printf("retval %d\n", fd);
-#endif
-    }
-  }
-  printf("Test exit %d\n", fd);
-}
-
-void *jit_thread_func(void *vargp) {
-  int offset = 0;
-
-  if (ptrace(PTRACE_TRACEME, 0, 1, 0) == 0) {
-    offset = 1;
-  }
-  if (ptrace(PTRACE_TRACEME, 0, 1, 0) == -1) {
-    offset *= 2;
-  }
-
-  char startfile[] = "boi0";
-  startfile[3] += offset;
-
-#ifdef DEBUG
-  printf("Startfile: %s\n", startfile);
-#endif
-
-  int fd = open(startfile, O_RDONLY);
-
-  callfunc(fd, regs);
-  pthread_exit(NULL);
 }
 
 void __attribute__((constructor)) spawn_mmap(void) {
-  checksum_me();
   dladdr_check("mmap", "libc.so.6");
   dladdr_check("free", "libc.so.6");
   dladdr_check("printf", "libc.so.6");
@@ -122,12 +111,7 @@ void __attribute__((constructor)) spawn_mmap(void) {
   dladdr_check("memset", "libc.so.6");
   dladdr_check("pthread_create", "libpthread.so.0");
   dladdr_check("pthread_exit", "libpthread.so.0");
-
-  jit_loop = malloc(sizeof(pthread_t));
-  regs = init_regs();
-
-  pthread_create(jit_loop, NULL, jit_thread_func, NULL);
-  pthread_join(*jit_loop, NULL);
+  checksum_me();
 }
 
 int main(int argc, char *argv[]) {

@@ -56,16 +56,6 @@ int load1(struct reg_t *reg) {
     JUMP_ENCODED(0x3831696f62);
   }
   /*  */
-  if (reg->r[CHECKER_REG] == 5) {
-    if (reg->r[POP_REG] == 'j') {
-      reg->r[GROUP_MATCH_REG] = 38;
-      reg->r[STATE_REG] = VERIFY_FOUND_KEY;
-      RETURN_ENCODED(reg);
-    }
-    reg->r[CHECKER_REG]++;
-    JUMP_ENCODED(0x3831696f62);
-  }
-  /*  */
 
   reg->r[CHECKER_REG] = 0;
   reg->r[GROUP_REG]++;

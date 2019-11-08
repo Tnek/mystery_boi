@@ -7,13 +7,13 @@
 int load1(struct reg_t *reg) {
   /*  */
   if (reg->r[CHECKER_REG] == 0) {
-    if (reg->r[POP_REG] == 's') {
-      reg->r[GROUP_MATCH_REG] = 10;
+    if (reg->r[POP_REG] == 'i') {
+      reg->r[GROUP_MATCH_REG] = 11;
       reg->r[STATE_REG] = VERIFY_FOUND_KEY;
       RETURN_ENCODED(reg);
     }
     reg->r[CHECKER_REG]++;
-    JUMP_ENCODED(0x3132696f62);
+    JUMP_ENCODED(0x3232696f62);
   }
   /*  */
 

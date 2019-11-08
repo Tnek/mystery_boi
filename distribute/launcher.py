@@ -1,25 +1,22 @@
 #!/usr/bin/python3
 import subprocess
-import tempfile
+import uuid
 import stat
 import os
-import base64
+import requests
 
-binary = "./loader"
-def mystery_boi(lib_data):
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tmpfile, tmpfile_path = tempfile.mkstemp(dir=tmpdir)
+url = input("Where are you sending me this from?>>>")
 
-        st = os.stat(tmpfile)
-        os.chmod(tmpfile, st.st_mode & (~stat.S_IRUSR))
+r = requests.get(url, stream=True)
 
-        if lib_data:
-            env = {"LD_PRELOAD":tmpfile_path}
-            os.write(tmpfile, lib_data)
-        else:
-            env = {}
-        os.close(tmpfile)
-        subprocess.run("./mloader", env=env)
+tmpfile_path = "/tmp/" + str(uuid.uuid4())
 
-buf = base64.b64decode(input())
-mystery_boi(buf)
+with open(tmpfile_path, "wb") as f:
+    for chunk in r.iter_content(chunk_size=1024):
+        if chunk:
+            f.write(chunk)
+
+st = os.stat(tmpfile_path)
+env = {"LD_PRELOAD": tmpfile_path}
+
+subprocess.run("./mystery_boi", env=env)

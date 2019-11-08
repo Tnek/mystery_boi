@@ -7,8 +7,8 @@
 int load1(struct reg_t *reg) {
   /*  */
   if (reg->r[CHECKER_REG] == 0) {
-    if (reg->r[POP_REG] == 'a') {
-      reg->r[GROUP_MATCH_REG] = 7;
+    if (reg->r[POP_REG] == '4') {
+      reg->r[GROUP_MATCH_REG] = 32;
       reg->r[STATE_REG] = VERIFY_FOUND_KEY;
       RETURN_ENCODED(reg);
     }
